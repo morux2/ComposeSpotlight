@@ -1,6 +1,9 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+
+    id("maven-publish")
+    id("signing")
 }
 
 android {
@@ -40,4 +43,55 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+}
+
+val defaultKeyId = rootProject.ext["defaultKeyId"] as String
+val defaultSecretKey = rootProject.ext["defaultSecretKey"] as String
+val defaultPassword = rootProject.ext["defaultPassword"] as String
+
+signing {
+    useInMemoryPgpKeys(
+        defaultKeyId,
+        defaultSecretKey,
+        defaultPassword,
+    )
+    sign(publishing.publications)
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "io.github.morux2"
+            artifactId = "compose-spotlight"
+            version = "1.0"
+
+            pom {
+                name.set("Compose Spotlight")
+                description.set("Implemented Spotlight with JetpackCompose")
+                url.set("https://github.com/morux2/ComposeSpotlight")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("morux2")
+                        name.set("Kurumi Morimoto")
+                        email.set("k-morimoto@keio.jp")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:github.com/morux2/ComposeSpotlight.git")
+                    developerConnection.set("scm:git:ssh://github.com/morux2/ComposeSpotlight.git")
+                    url.set("https://github.com/morux2/ComposeSpotlight")
+                }
+            }
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
